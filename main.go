@@ -150,7 +150,7 @@ Options:
 	}
 
 	if !*skipConfirmation {
-		confirmed, err := confirmJobCreation()
+		confirmed, err := confirmByUser()
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%s: %v\n", cmdName, err)
 			return exitStatusErr
@@ -287,7 +287,13 @@ func randStr(n int) (string, error) {
 	return builder.String(), nil
 }
 
-func confirmByUser(tty *tty.TTY) (bool, error) {
+func confirmByUser() (bool, error) {
+	tty, err := tty.Open()
+	if err != nil {
+		return false, err
+	}
+	defer tty.Close()
+
 	fmt.Fprint(tty.Output(), "Do you want to create a job with the change you just made? [y/n]\n")
 
 	sigs := make(chan os.Signal, 1)
@@ -512,16 +518,6 @@ func applyPatch(jobMap map[string]interface{}, path string, value interface{}) e
 	}
 
 	return nil
-}
-
-func confirmJobCreation() (bool, error) {
-	tty, err := tty.Open()
-	if err != nil {
-		return false, err
-	}
-	defer tty.Close()
-
-	return confirmByUser(tty)
 }
 
 func applyJob(filename string) error {
