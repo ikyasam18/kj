@@ -44,9 +44,10 @@ func main() {
 
 func run() int {
 	var (
-		kubeconfig *string
-		filename   *string
-		patchFile  *string
+		kubeconfig       *string
+		filename         *string
+		patchFile        *string
+		skipConfirmation *bool
 	)
 	// default kubeconfig path is loaded in the following priority:
 	// 1. load environment variable KUBECONFIG exists
@@ -64,6 +65,7 @@ func run() int {
 	}
 	filename = flag.String("f", "", "(optional) filename to save Job resource")
 	patchFile = flag.String("patch-file", "", "(optional) JSON file with patch information")
+	skipConfirmation = flag.Bool("y", false, "Skip confirmation prompt")
 	flag.Usage = func() {
 		fmt.Printf(`%[1]s - create custom job from cronjob template
 
@@ -147,13 +149,16 @@ Options:
 		fmt.Fprintf(os.Stderr, "%s: %v\n", cmdName, err)
 	}
 
-	confirmed, err := confirmJobCreation()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s: %v\n", cmdName, err)
-	}
-	if !confirmed {
-		fmt.Println("canceled")
-		return exitStatusOK
+	if !*skipConfirmation {
+		confirmed, err := confirmJobCreation()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%s: %v\n", cmdName, err)
+			return exitStatusErr
+		}
+		if !confirmed {
+			fmt.Println("canceled")
+			return exitStatusOK
+		}
 	}
 
 	if err := applyJob(jobFilename); err != nil {
@@ -520,16 +525,10 @@ func confirmJobCreation() (bool, error) {
 }
 
 func applyJob(filename string) error {
-	tty, err := tty.Open()
-	if err != nil {
-		return err
-	}
-	defer tty.Close()
-
 	cmd := exec.Command("kubectl", "apply", "-f", filename)
-	cmd.Stdin = tty.Input()
-	cmd.Stdout = tty.Output()
-	cmd.Stderr = tty.Output()
+	cmd.Stdin = nil
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
