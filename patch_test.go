@@ -68,17 +68,18 @@ func TestPatchJobEditor(t *testing.T) {
 			expectedCommand: []string{"python", "script.py", "--flag", "value"},
 		},
 		"YAML patch format": {
-			patchContent: `spec:
-				template:
-					spec:
-						containers:
-							- name: test-container
-								image: yaml-image:latest
-								command:
-								- node
-								- server.js
-								- --port=8080
-				`,
+			patchContent: `
+spec:
+  template:
+    spec:
+      containers:
+        - name: test-container
+          image: yaml-image:latest
+          command:
+            - node
+            - server.js
+            - --port=8080
+`,
 			expectedImage:   "yaml-image:latest",
 			expectedCommand: []string{"node", "server.js", "--port=8080"},
 		},
@@ -88,13 +89,14 @@ func TestPatchJobEditor(t *testing.T) {
 			expectedCommand: []string{"echo", "hello"},
 		},
 		"minimal YAML patch": {
-			patchContent: `spec:
-				template:
-					spec:
-						containers:
-							- name: test-container
-								image: minimal-yaml-image
-			`,
+			patchContent: `
+spec:
+  template:
+    spec:
+      containers:
+        - name: test-container
+          image: minimal-yaml-image
+`,
 			expectedImage:   "minimal-yaml-image",
 			expectedCommand: []string{"echo", "hello"},
 		},
