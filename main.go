@@ -76,14 +76,12 @@ Examples:
     # Edit a job interactively in your editor
     %[1]s namespace name
     
-    # Apply patch from JSON file without opening an editor
+    # Apply patch from JSON or YAML file without opening an editor
     %[1]s --patch-file=/path/to/patch.json namespace name 
     
-    # Patch file format (JSON):
-    # {
-    #   "path": "spec.template.spec.containers[0].command",
-    #   "value": ["python", "main.py", "--option", "hoge"]
-    # }
+	# Patch file format :
+    # Refer to https://kubernetes.io/docs/reference/kubectl/generated/kubectl_patch/
+
 
 Options:
 `, cmdName)
