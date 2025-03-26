@@ -143,6 +143,7 @@ Options:
 
 	if err := editor.EditJob(job); err != nil {
 		fmt.Fprintf(os.Stderr, "%s: %v\n", cmdName, err)
+		return exitStatusErr
 	}
 
 	confirmed, err := confirmJobCreation()
@@ -399,7 +400,7 @@ func (e *patchJobEditor) EditJob(job *batchv1.Job) error {
 
 	patchJSON, err := apiyaml.ToJSON(patchBytes)
 	if err != nil {
-		return fmt.Errorf("failed to convert patch to JSON: %w", err)
+		return fmt.Errorf("failed to convert patch to JSON: %w\nPatch content: %s", err, string(patchBytes))
 	}
 
 	patchedJSON, err := strategicpatch.StrategicMergePatch(origJSON, patchJSON, job)
